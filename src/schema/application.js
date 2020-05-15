@@ -18,13 +18,4 @@ export default gql`
     job: Job
     user: User
   }
-
-  type Job {
-    id: ID!
-    url: String
-    company: String
-    createdAt: Date!
-    source: String
-    platform: String
-  }
 `;

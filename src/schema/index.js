@@ -3,6 +3,7 @@ import { gql } from 'apollo-server-express';
 import userSchema from './user';
 import profileSchema from './profile';
 import applicationSchema from './application';
+import jobSchema from './job';
 
 const linkSchema = gql`
   scalar Date
@@ -26,4 +27,4 @@ const linkSchema = gql`
   }
 `;
 
-export default [linkSchema, userSchema, profileSchema, applicationSchema];
+export default [linkSchema, userSchema, profileSchema, applicationSchema, jobSchema];
