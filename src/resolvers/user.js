@@ -61,6 +61,7 @@ export default {
       if (!isValid) {
         throw new AuthenticationError('Invalid password.');
       }
+      console.log(user);
       return { token: createToken(user, secret, '30m') };
     },
 

@@ -2,7 +2,7 @@ import { gql } from 'apollo-server-express';
 
 export default gql`
   extend type Query {
-    profile(id: ID!): Profile!
+    profile: Profile!
   }
 
   extend type Mutation {

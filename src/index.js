@@ -72,7 +72,7 @@ const httpServer = http.createServer(app);
 server.installSubscriptionHandlers(httpServer);
 
 connectDb().then(async () => {
-  if (!config.isProduction) {
+  if (config.isTest) {
     // reset database
     await Promise.all([
       models.User.deleteMany({}),
@@ -107,32 +107,6 @@ const createSampleData = async (date) => {
     createdAt: date.setSeconds(date.getSeconds() + 1),
   });
 
-  // const profile = new models.Profile({
-  //   fields: [
-  //     { name: 'fullname', value: 'Bill Gates' },
-  //     { name: 'email', value: 'bill@microsoft.com' },
-  //     { name: 'title', value: 'CEO' },
-  //     { name: 'address.city', value: 'Redmond' },
-  //     { name: 'address.state', value: 'WA' },
-  //   ],
-  //   userId: user.id,
-  //   createdAt: date.setSeconds(date.getSeconds() + 1),
-  // });
-
-  // const application = new models.Application({
-  //   fields: [
-  //     { name: 'fullname', value: 'Bill Gates' },
-  //     { name: 'email', value: 'bill@gatesfoundation.com' },
-  //     { name: 'title', value: 'Philanthropist' },
-  //     { name: 'experience', value: 'Giving away lots of money' },
-  //   ],
-  //   jobId: job.id,
-  //   userId: user.id,
-  //   createdAt: date.setSeconds(date.getSeconds() + 1),
-  // });
-
   await user.save();
   await job.save();
-  // await profile.save();
-  // await application.save();
 };
