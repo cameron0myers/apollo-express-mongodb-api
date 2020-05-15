@@ -1,75 +1,71 @@
 import { combineResolvers } from 'graphql-resolvers';
 
-import pubsub, { EVENTS } from '../subscription';
-import { isAuthenticated, isMessageOwner } from './authorization';
-
-const toCursorHash = string => Buffer.from(string).toString('base64');
-
-const fromCursorHash = string =>
-  Buffer.from(string, 'base64').toString('ascii');
+import { isAuthenticated, isProfileOwner } from './authorization';
 
 export default {
   Query: {
-    messages: async (parent, { cursor, limit = 100 }, { models }) => {
-      const cursorOptions = cursor
-        ? {
-            createdAt: {
-              $lt: fromCursorHash(cursor),
-            },
-          }
-        : {};
-      const messages = await models.Message.find(
-        cursorOptions,
-        null,
-        {
-          sort: { createdAt: -1 },
-          limit: limit + 1,
-        },
-      );
-
-      const hasNextPage = messages.length > limit;
-      const edges = hasNextPage ? messages.slice(0, -1) : messages;
-
-      return {
-        edges,
-        pageInfo: {
-          hasNextPage,
-          endCursor: toCursorHash(
-            edges[edges.length - 1].createdAt.toString(),
-          ),
-        },
-      };
-    },
-    message: async (parent, { id }, { models }) => {
-      return await models.Message.findById(id);
+    profile: async (parent, { id }, { models }) => {
+      return await models.Profile.findById(id);
     },
   },
 
   Mutation: {
-    createMessage: combineResolvers(
+    createProfile: combineResolvers(
       isAuthenticated,
-      async (parent, { text }, { models, me }) => {
-        const message = await models.Message.create({
-          text,
+      async (parent, { fields }, { models, me }) => {
+        const profile = await models.Profile.findOne({ userId: me.id });
+        if(profile) {
+          throw new Error("Can't create more than one profile per user");
+        }
+        const uprofile = await models.Profile.create({
+          fields,
           userId: me.id,
         });
 
-        pubsub.publish(EVENTS.MESSAGE.CREATED, {
-          messageCreated: { message },
-        });
-
-        return message;
+        return uprofile;
       },
     ),
 
-    deleteMessage: combineResolvers(
+    updateProfile: combineResolvers(
       isAuthenticated,
-      isMessageOwner,
-      async (parent, { id }, { models }) => {
-        const message = await models.Message.findById(id);
+      async (parent, { fields }, { models, me }) => {
+        const profile = await models.Profile.findOne({ userId: me.id });
+        let uprofile = null;
+        if(!profile) {
+          uprofile = await models.Profile.create({
+            fields,
+            userId: me.id,
+          });
+        } else {
+          const newItems = [...fields];
+          let ufields = profile.fields.map(item => {
+            const index = newItems.findIndex(uitem => uitem.name === item.name);
+            if(index !== -1) {
+              const [uitem] = newItems.splice(index, 1);
+              return uitem;
+            } else {
+              return {name: item.name, value: item.value};
+            }
+          });
+          ufields = ufields.concat(newItems);
+          uprofile = await models.Profile.findByIdAndUpdate(
+            profile._id,
+            { fields: ufields },
+            { new: true },
+          );
+        }
+        return uprofile;
+      },
+    ),
 
-        if (message) {
-          await message.remove();
+    deleteProfile: combineResolvers(
+      isAuthenticated,
+      isProfileOwner,
+      async (parent, { id }, { models }) => {
+        const profile = await models.Profile.findById(id);
+
+        if (profile) {
+          await profile.remove();
           return true;
         } else {
           return false;
@@ -78,15 +74,15 @@ export default {
     ),
   },
 
-  Message: {
-    user: async (message, args, { loaders }) => {
-      return await loaders.user.load(message.userId);
+  Profile: {
+    user: async (profile, args, { models }) => {
+      const user = await models.User.findById(profile.userId);
+      return user;
     },
-  },
-
-  Subscription: {
-    messageCreated: {
-      subscribe: () => pubsub.asyncIterator(EVENTS.MESSAGE.CREATED),
+    applications: async (profile, args, { models }) => {
+      return await models.Application.find({
+        userId: profile.userId,
+      });
     },
   },
 };
