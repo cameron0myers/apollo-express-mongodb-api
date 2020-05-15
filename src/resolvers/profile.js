@@ -4,9 +4,11 @@ import { isAuthenticated, isProfileOwner } from './authorization';
 
 export default {
   Query: {
-    profile: async (parent, { id }, { models }) => {
-      return await models.Profile.findById(id);
-    },
+    profile: combineResolvers(
+      isAuthenticated,
+      async (parent, args, { models, me }) => {
+      return await models.Profile.findOne({ userId: me.id });
+    }),
   },
 
   Mutation: {
