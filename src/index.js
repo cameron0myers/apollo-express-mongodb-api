@@ -13,6 +13,8 @@ import {
 import config from './config';
 import models, { connectDb } from './models';
 import loaders from './loaders';
+import schema from './schema';
+import resolvers from './resolvers';
 
 const app = express();
 
@@ -58,6 +60,9 @@ const server = new ApolloServer({
           user: new DataLoader(keys =>
             loaders.user.batchUsers(keys, models),
           ),
+          profile: new DataLoader(keys =>
+            loaders.profile.batchProfiles(keys, models),
+          ),
         },
       };
     }
@@ -72,6 +77,9 @@ const server = new ApolloServer({
         loaders: {
           user: new DataLoader(keys =>
             loaders.user.batchUsers(keys, models),
+          ),
+          profile: new DataLoader(keys =>
+            loaders.profile.batchProfiles(keys, models),
           ),
         },
       };

@@ -1,21 +1,15 @@
 import mongoose from 'mongoose';
 
+export const fieldSchema = new mongoose.Schema({ name: { type: String }, value: { type: String } });
+
 const applicationSchema = new mongoose.Schema(
   {
-    title: {
-      type: String,
-    },
-    fullname: {
-      type: String,
-    },
-    email: {
-      type: String,
-    },
+    fields: [fieldSchema],
+    jobId: { type: mongoose.Schema.Types.ObjectId, ref: 'Job' },
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   },
   {
     timestamps: true,
-    strict: false,
   },
 );
 
