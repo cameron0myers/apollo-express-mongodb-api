@@ -1,5 +1,6 @@
 import { combineResolvers } from 'graphql-resolvers';
 
+import pubsub, { EVENTS } from '../subscription';
 import { isAuthenticated } from './authorization';
 
 export default {
@@ -7,6 +8,11 @@ export default {
     application: async (parent, { id }, { models }) => {
       return await models.Application.findById(id);
     },
+    applications: combineResolvers(
+      isAuthenticated,
+      async (parent, args, { models, me }) => {
+      return await models.Application.find({ userId: me.id });
+    }),
   },
 
   Mutation: {
@@ -55,6 +61,12 @@ export default {
     },
     job: async (application, args, { models }) => {
       return await models.Job.findById(application.jobId);
+    },
+  },
+
+  Subscription: {
+    applicationCreated: {
+      subscribe: () => pubsub.asyncIterator(EVENTS.APPLICATION.CREATED),
     },
   },
 };
