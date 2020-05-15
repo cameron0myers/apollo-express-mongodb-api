@@ -1,6 +1,6 @@
 import { combineResolvers } from 'graphql-resolvers';
 
-import { isAuthenticated, isMessageOwner } from './authorization';
+import { isAuthenticated } from './authorization';
 
 export default {
   Query: {
