@@ -19,6 +19,11 @@ const linkSchema = gql`
     name: String!
     value: String!
   }
+
+  input FieldInput {
+    name: String!
+    value: String!
+  }
 `;
 
 export default [linkSchema, userSchema, profileSchema, applicationSchema];

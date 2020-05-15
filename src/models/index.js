@@ -8,17 +8,17 @@ import Application from './application';
 const models = { User, Application, Job, Profile };
 
 const connectDb = () => {
-  if (process.env.TEST) {
-    return mongoose.connect(
-      process.env.TEST_DATABASE_URL,
-      { useNewUrlParser: true },
-    );
-  } else {
-    return mongoose.connect(
-      process.env.DATABASE_URL,
-      { useNewUrlParser: true },
-    );
-  }
+  return mongoose.connect(
+    process.env.TEST && process.env.TEST_DATABASE_URL
+      ? process.env.TEST_DATABASE_URL
+      : process.env.DATABASE_URL,
+    {
+      useNewUrlParser: true,
+      useCreateIndex: true,
+      useFindAndModify: false,
+      useUnifiedTopology: true,
+    },
+  );
 };
 
 export { connectDb };

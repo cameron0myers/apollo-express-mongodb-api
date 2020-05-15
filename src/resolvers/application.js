@@ -1,92 +1,60 @@
 import { combineResolvers } from 'graphql-resolvers';
 
-import pubsub, { EVENTS } from '../subscription';
 import { isAuthenticated, isMessageOwner } from './authorization';
-
-const toCursorHash = string => Buffer.from(string).toString('base64');
-
-const fromCursorHash = string =>
-  Buffer.from(string, 'base64').toString('ascii');
 
 export default {
   Query: {
-    messages: async (parent, { cursor, limit = 100 }, { models }) => {
-      const cursorOptions = cursor
-        ? {
-            createdAt: {
-              $lt: fromCursorHash(cursor),
-            },
-          }
-        : {};
-      const messages = await models.Message.find(
-        cursorOptions,
-        null,
-        {
-          sort: { createdAt: -1 },
-          limit: limit + 1,
-        },
-      );
-
-      const hasNextPage = messages.length > limit;
-      const edges = hasNextPage ? messages.slice(0, -1) : messages;
-
-      return {
-        edges,
-        pageInfo: {
-          hasNextPage,
-          endCursor: toCursorHash(
-            edges[edges.length - 1].createdAt.toString(),
-          ),
-        },
-      };
-    },
-    message: async (parent, { id }, { models }) => {
-      return await models.Message.findById(id);
+    application: async (parent, { id }, { models }) => {
+      return await models.Application.findById(id);
     },
   },
 
   Mutation: {
-    createMessage: combineResolvers(
+    createApplication: combineResolvers(
       isAuthenticated,
-      async (parent, { text }, { models, me }) => {
-        const message = await models.Message.create({
-          text,
+      async (parent, { fields, jobId }, { models, me }) => {
+        const application = await models.Application.create({
+          fields,
+          jobId,
           userId: me.id,
         });
-
-        pubsub.publish(EVENTS.MESSAGE.CREATED, {
-          messageCreated: { message },
-        });
-
-        return message;
-      },
-    ),
-
-    deleteMessage: combineResolvers(
-      isAuthenticated,
-      isMessageOwner,
-      async (parent, { id }, { models }) => {
-        const message = await models.Message.findById(id);
-
-        if (message) {
-          await message.remove();
-          return true;
+        const profile = await models.Profile.findOne({ userId: me.id });
+        let uprofile = null;
+        if(!profile) {
+          uprofile = await models.Profile.create({
+            fields,
+            userId: me.id,
+          });
         } else {
-          return false;
+          const newItems = [...fields];
+          let ufields = profile.fields.map(item => {
+            const index = newItems.findIndex(uitem => uitem.name === item.name);
+            if(index !== -1) {
+              const [uitem] = newItems.splice(index, 1);
+              return uitem;
+            } else {
+              return {name: item.name, value: item.value};
+            }
+          });
+          ufields = ufields.concat(newItems);
+          uprofile = await models.Profile.findByIdAndUpdate(
+            profile._id,
+            { fields: ufields },
+            { new: true },
+          );
         }
+
+        return application;
       },
     ),
   },
 
-  Message: {
-    user: async (message, args, { loaders }) => {
-      return await loaders.user.load(message.userId);
+  Application: {
+    user: async (application, args, { models }) => {
+      return await models.User.findById(application.userId);
     },
-  },
-
-  Subscription: {
-    messageCreated: {
-      subscribe: () => pubsub.asyncIterator(EVENTS.MESSAGE.CREATED),
+    job: async (application, args, { models }) => {
+      return await models.Job.findById(application.jobId);
     },
   },
 };
