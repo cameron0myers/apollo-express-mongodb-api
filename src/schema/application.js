@@ -10,14 +10,6 @@ export default gql`
     createApplication(fields: [FieldInput!]!, jobId: String!): Application!
   }
 
-  extend type Subscription {
-    applicationCreated: ApplicationCreated!
-  }
-
-  type ApplicationCreated {
-    application: Application!
-  }
-
   type Application {
     id: ID!
     fields: [Field]
