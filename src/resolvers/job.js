@@ -14,5 +14,5 @@ export default {
       async (parent, { id }, { models }) => {
       return await models.Job.findById(id);
     }),
-  },
+  }, // query for getting sepecific job or job listings
 };

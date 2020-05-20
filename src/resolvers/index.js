@@ -1,4 +1,4 @@
-import { GraphQLDateTime } from 'graphql-iso-date';
+import { GraphQLDateTime } from 'graphql-iso-date'; // can use DateTime
 
 import userResolvers from './user';
 import profileResolvers from './profile';

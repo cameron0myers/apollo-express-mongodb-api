@@ -27,7 +27,7 @@ const userSchema = new mongoose.Schema(
   {
     timestamps: true,
   },
-);
+); //  user model
 
 userSchema.statics.findByLogin = async function (login) {
   let user = await this.findOne({
@@ -39,27 +39,27 @@ userSchema.statics.findByLogin = async function (login) {
   }
 
   return user;
-};
+}; // login can be username or email. if a user already in the DB, pass user. otherways pass null
 
 userSchema.pre('remove', function (next) {
   Promise.all([
     this.model('profile').deleteMany({ userId: this._id }),
     this.model('application').deleteMany({ userId: this._id }),
   ]).then(next);
-});
+}); // before remove user, remove all data of this user including profile and applications
 
 userSchema.pre('save', async function() {
   this.password = await this.generatePasswordHash();
-});
+}); // Encrypt password before save
 
 userSchema.methods.generatePasswordHash = async function() {
   const saltRounds = 10;
   return await bcrypt.hash(this.password, saltRounds);
-};
+}; // encryption
 
 userSchema.methods.validatePassword = async function(password) {
   return await bcrypt.compare(password, this.password);
-};
+}; // password comparison
 
 const User = mongoose.model('User', userSchema);
 
