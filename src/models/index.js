@@ -19,7 +19,7 @@ const connectDb = () => {
       useUnifiedTopology: true,
     },
   );
-};
+}; // connect db and mongoose
 
 export { connectDb };
 

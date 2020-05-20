@@ -11,7 +11,8 @@ const applicationSchema = new mongoose.Schema(
   {
     timestamps: true,
   },
-);
+); // application model for mongodb
+// I used array for fields because the fields are dynamic
 
 const Application = mongoose.model('Application', applicationSchema);
 

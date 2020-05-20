@@ -30,6 +30,7 @@ export default {
 
     updateProfile: combineResolvers(
       isAuthenticated,
+      isProfileOwner,
       async (parent, { fields }, { models, me }) => {
         const profile = await models.Profile.findOne({ userId: me.id });
         let uprofile = null;

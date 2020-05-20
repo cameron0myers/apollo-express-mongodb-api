@@ -2,7 +2,7 @@ import { ForbiddenError } from 'apollo-server';
 import { combineResolvers, skip } from 'graphql-resolvers';
 
 export const isAuthenticated = (parent, args, { me }) =>
-  me ? skip : new ForbiddenError('Not authenticated as user.');
+  me ? skip : new ForbiddenError('Not authenticated as user.'); // when token is valid, 'me' contains the user's information.
 
 export const isProfileOwner = async (
   parent,
@@ -16,4 +16,4 @@ export const isProfileOwner = async (
   }
 
   return skip;
-};
+}; // check before profile modify

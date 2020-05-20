@@ -27,21 +27,22 @@ const getMe = async (req) => {
   if (token) {
     try {
       const user = await jwt.verify(token, process.env.SECRET);
-      return user;
+      return user; // if the token valid, pass the user information.
     } catch (e) {
       // throw new AuthenticationError(
       //   'Your session expired. Sign in again.',
       // );
     }
   }
-  return null;
+  return null; // if not, pass null
 };
 
 const server = new ApolloServer({
-  introspection: true,
-  typeDefs: schema,
-  resolvers,
-  formatError: (error) => {
+  // playground: true, // enable GraphQL Playground for testing
+  // introspection: true, // enable GraphQL introspection for testing
+  typeDefs: schema, // schemas
+  resolvers, // resolveres
+  formatError: (error) => { // formatting error
     // remove the internal sequelize error message
     // leave only the important validation error
     const message = error.message
@@ -53,7 +54,7 @@ const server = new ApolloServer({
       message,
     };
   },
-  context: async ({ req }) => {
+  context: async ({ req }) => { // define the context for checking auth and getting user data
 
     if (req) {
       const me = await getMe(req);
@@ -67,13 +68,13 @@ const server = new ApolloServer({
   },
 });
 
-server.applyMiddleware({ app, path: '/graphql' });
+server.applyMiddleware({ app, path: '/graphql' }); // set graphql api path to /graphql and add express
 
 const httpServer = http.createServer(app);
-server.installSubscriptionHandlers(httpServer);
+// server.installSubscriptionHandlers(httpServer); // install subscription with websocket
 
-connectDb().then(async () => {
-  if (config.isTest) {
+connectDb().then(async () => { 
+  if (config.isTest) {// DB initialization for test
     // reset database
     await Promise.all([
       models.User.deleteMany({}),

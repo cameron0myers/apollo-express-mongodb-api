@@ -18,7 +18,7 @@ const jobSchema = new mongoose.Schema(
   {
     timestamps: true,
   },
-);
+); // job model
 
 const Job = mongoose.model('Job', jobSchema);
 

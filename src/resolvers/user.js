@@ -9,7 +9,7 @@ const createToken = async (user, secret, expiresIn) => {
   return await jwt.sign({ id, email, username }, secret, {
     expiresIn,
   });
-};
+}; // creating the jwt token
 
 export default {
   Query: {

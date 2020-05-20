@@ -9,7 +9,8 @@ const profileSchema = new mongoose.Schema(
   {
     timestamps: true,
   },
-);
+); // profile model for mongodb
+// I used array for fields because the fields are dynamic
 
 const Profile = mongoose.model('Profile', profileSchema);
 
