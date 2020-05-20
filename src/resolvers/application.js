@@ -1,6 +1,5 @@
 import { combineResolvers } from 'graphql-resolvers';
 
-import pubsub, { EVENTS } from '../subscription';
 import { isAuthenticated } from './authorization';
 
 export default {
@@ -61,12 +60,6 @@ export default {
     },
     job: async (application, args, { models }) => {
       return await models.Job.findById(application.jobId);
-    },
-  },
-
-  Subscription: {
-    applicationCreated: {
-      subscribe: () => pubsub.asyncIterator(EVENTS.APPLICATION.CREATED),
     },
   },
 };

@@ -16,10 +16,6 @@ const linkSchema = gql`
     _: Boolean
   }
 
-  type Subscription {
-    _: Boolean
-  }
-
   type Field {
     name: String!
     value: String!
